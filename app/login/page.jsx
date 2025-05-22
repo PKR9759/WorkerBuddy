@@ -23,14 +23,21 @@ export default function Login() {
         email: form.email,
         password: form.password
       });
+  
       localStorage.setItem("token", res.data.token);
       alert("Login successful");
-      router.push("/");
+  
+      if (res.data.userType === "Worker") {
+        router.push("/worker");
+      } else {
+        router.push("/user");
+      }
     } catch (err) {
       alert(err?.response?.data?.message || "Login failed");
     }
   };
 
+  
   return (
     <div className="min-h-screen flex">
       <div className="hidden md:flex flex-col justify-center items-center w-1/3 bg-gray-900 border-r border-gray-700 px-10">

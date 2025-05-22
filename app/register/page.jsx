@@ -26,11 +26,16 @@ export default function Register() {
       alert("Passwords do not match");
       return;
     }
-
+  
     try {
       await axios.post("/auth/register", form);
       alert("Registration successful");
-      router.push("/user");
+  
+      if (form.userType === "Worker") {
+        router.push("/worker");
+      } else {
+        router.push("/user");
+      }
     } catch (err) {
       alert(err?.response?.data?.message || "Registration failed");
     }
