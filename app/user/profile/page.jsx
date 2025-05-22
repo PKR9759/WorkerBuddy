@@ -1,118 +1,145 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function UserProfilePage() {
   const [userData, setUserData] = useState({
-    name: "Rahul Mehta",
-    email: "rahul@example.com",
-    phone: "9876543210",
-    address: "Ahmedabad, Gujarat",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
-
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ ...userData });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("/api/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const profile = {
+          name: response.data.user.name || "",
+          email: response.data.user.email || "",
+          phone: response.data.user.phone || "",
+          address: response.data.user.address || "",
+        };
+
+        setUserData(profile);
+        setForm(profile);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError("Failed to load profile data");
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    setUserData(form);
-    setEditMode(false);
+  const handleSave = async () => {
+    setUpdating(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch("/api/profile", form, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserData(form);
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile. Please try again.");
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white px-4 py-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-gray-400">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white px-4 py-8">
       <div className="max-w-3xl mx-auto bg-gray-800 p-6 rounded-xl shadow-md">
         <h1 className="text-3xl font-bold mb-6 text-center">User Profile</h1>
 
+        {error && (
+          <div className="bg-red-500 text-white p-3 rounded-md mb-4">
+            {error}
+          </div>
+        )}
+
         <div className="space-y-4">
-          <div>
-            <label className="text-gray-400 block">Name</label>
-            {editMode ? (
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
-              />
-            ) : (
-              <p className="mt-1">{userData.name}</p>
-            )}
-          </div>
+          {["name", "email", "phone", "address"].map((field) => (
+            <div key={field}>
+              <label className="text-gray-400 block capitalize">{field}</label>
+              {editMode ? (
+                <input
+                  type={field === "email" ? "email" : "text"}
+                  name={field}
+                  value={form[field]}
+                  onChange={handleChange}
+                  className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
+                />
+              ) : (
+                <p className="mt-1">{userData[field]}</p>
+              )}
+            </div>
+          ))}
+        </div>
 
-          <div>
-            <label className="text-gray-400 block">Email</label>
-            {editMode ? (
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
-              />
-            ) : (
-              <p className="mt-1">{userData.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-gray-400 block">Phone</label>
-            {editMode ? (
-              <input
-                type="text"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
-              />
-            ) : (
-              <p className="mt-1">{userData.phone}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-gray-400 block">Address</label>
-            {editMode ? (
-              <textarea
-                name="address"
-                rows={2}
-                value={form.address}
-                onChange={handleChange}
-                className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
-              />
-            ) : (
-              <p className="mt-1">{userData.address}</p>
-            )}
-          </div>
-
-          <div className="text-right mt-6">
-            {editMode ? (
-              <div className="space-x-3">
-                <button
-                  onClick={() => setEditMode(false)}
-                  className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
+        <div className="flex justify-end gap-4 mt-6">
+          {editMode ? (
+            <>
               <button
-                onClick={() => setEditMode(true)}
-                className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                onClick={handleSave}
+                disabled={updating}
+                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md text-white disabled:opacity-50"
               >
-                Edit Profile
+                {updating ? "Saving..." : "Save"}
               </button>
-            )}
-          </div>
+              <button
+                onClick={() => {
+                  setEditMode(false);
+                  setForm(userData);
+                }}
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md text-white"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-md text-white"
+            >
+              Edit Profile
+            </button>
+          )}
         </div>
       </div>
     </div>

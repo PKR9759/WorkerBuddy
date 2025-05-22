@@ -30,7 +30,7 @@ export default function Register() {
     try {
       await axios.post("/auth/register", form);
       alert("Registration successful");
-      router.push("/login");
+      router.push("/user");
     } catch (err) {
       alert(err?.response?.data?.message || "Registration failed");
     }
@@ -114,8 +114,8 @@ export default function Register() {
           className="mb-6 w-full p-3 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-white"
           required
         >
-          <option value="user">User</option>
-          <option value="worker">Worker</option>
+          <option value="User">User</option>
+          <option value="Worker">Worker</option>
           
         </select>
 

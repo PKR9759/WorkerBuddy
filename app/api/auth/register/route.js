@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import Worker from "@/models/Worker";
 import bcrypt from "bcryptjs";
 
 export async function POST(req) {
@@ -24,6 +25,19 @@ export async function POST(req) {
     userType,
     pincode
   });
+
+  // If userType is Worker, create corresponding Worker entry
+  if (userType === "Worker") {
+    await Worker.create({
+      userId: newUser._id,
+      skills: [], // default empty array; you can let user add skills later
+      availability: true,
+      rating: 0,
+      verified: false,
+      reviews: [],
+      workHistory: []
+    });
+  }
 
   return new Response(JSON.stringify({ message: "User registered successfully" }), { status: 201 });
 }

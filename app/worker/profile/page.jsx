@@ -1,101 +1,143 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
 
-export default function WorkerProfile() {
-  const [form, setForm] = useState({
+export default function UserProfilePage() {
+  const [userData, setUserData] = useState({
     name: "",
     email: "",
-    contactNumber: "",
-    location: "",
+    phone: "",
+    address: "",
   });
+  const [editMode, setEditMode] = useState(false);
+  const [form, setForm] = useState({ ...userData });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState("");
 
-  // Dummy effect to simulate fetching current profile info
+  const getToken = () => localStorage.getItem("token");
+
   useEffect(() => {
-    // Simulate fetched data
-    const fetchedData = {
-      name: "John Worker",
-      email: "john.worker@example.com",
-      contactNumber: "1234567890",
-      location: "Ahmedabad, Gujarat",
+    const fetchProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const token = getToken();
+        const response = await axios.get('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const profile = {
+          name: response.data.user.name || "",
+          email: response.data.user.email || "",
+          phone: response.data.user.phone || "",
+          address: response.data.user.address || "",
+        };
+        setUserData(profile);
+        setForm(profile);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError("Failed to load profile data");
+      } finally {
+        setProfileLoading(false);
+      }
     };
-    setForm(fetchedData);
+
+    fetchProfile();
   }, []);
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would send updated data to backend
-    alert("Profile updated successfully!");
+  const handleSave = async () => {
+    setUpdating(true);
+    setError("");
+    try {
+      const token = getToken();
+      await axios.patch('/api/profile', form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserData(form);
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile. Please try again.");
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white px-4 py-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-gray-400">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-gray-800 rounded-lg shadow-lg text-white mt-8">
-      <h2 className="text-3xl font-bold mb-6 text-center">Your Profile</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block mb-1 font-semibold" htmlFor="name">Name</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full p-3 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
+    <div className="min-h-screen bg-gray-900 text-white px-4 py-8">
+      <div className="max-w-3xl mx-auto bg-gray-800 p-6 rounded-xl shadow-md">
+        <h1 className="text-3xl font-bold mb-6 text-center">User Profile</h1>
+
+        {error && (
+          <div className="bg-red-500 text-white p-3 rounded-md mb-4">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {["name", "email", "phone", "address"].map((field) => (
+            <div key={field}>
+              <label className="text-gray-400 block capitalize">{field}</label>
+              {editMode ? (
+                <input
+                  type={field === "email" ? "email" : "text"}
+                  name={field}
+                  value={form[field]}
+                  onChange={handleChange}
+                  className="mt-1 w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white"
+                />
+              ) : (
+                <p className="mt-1">{userData[field]}</p>
+              )}
+            </div>
+          ))}
         </div>
 
-        <div>
-          <label className="block mb-1 font-semibold" htmlFor="email">Email (readonly)</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={form.email}
-            readOnly
-            className="w-full p-3 rounded-md bg-gray-600 text-gray-300 cursor-not-allowed"
-          />
+        <div className="flex justify-end gap-4 mt-6">
+          {editMode ? (
+            <>
+              <button
+                onClick={handleSave}
+                disabled={updating}
+                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md text-white disabled:opacity-50"
+              >
+                {updating ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => {
+                  setEditMode(false);
+                  setForm(userData);
+                }}
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md text-white"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-md text-white"
+            >
+              Edit Profile
+            </button>
+          )}
         </div>
-
-        <div>
-          <label className="block mb-1 font-semibold" htmlFor="contactNumber">Contact Number</label>
-          <input
-            type="tel"
-            name="contactNumber"
-            id="contactNumber"
-            value={form.contactNumber}
-            onChange={handleChange}
-            className="w-full p-3 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter your contact number"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-semibold" htmlFor="location">Location</label>
-          <input
-            type="text"
-            name="location"
-            id="location"
-            value={form.location}
-            onChange={handleChange}
-            className="w-full p-3 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter your location"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold transition"
-        >
-          Update Profile
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
