@@ -9,7 +9,7 @@ export default function WorkerLayout({ children }) {
   return (
     <>
       <WorkerNavbar />
-      <main className="bg-gray-900 min-h-screen pt-16 text-white max-w-7xl mx-auto px-4">
+      <main className="bg-gray-900  pt-10 text-white ">
         {children}
       </main>
     </>

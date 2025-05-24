@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Worker from "@/models/Worker";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   await connectDB();
@@ -39,5 +40,29 @@ export async function POST(req) {
     });
   }
 
-  return new Response(JSON.stringify({ message: "User registered successfully" }), { status: 201 });
+  // Generate JWT token
+  const token = jwt.sign(
+    { 
+      userId: newUser._id, 
+      email: newUser.email, 
+      userType: newUser.userType 
+    },
+    process.env.JWT_SECRET || "your_jwt_secret_key",
+    { expiresIn: "7d" }
+  );
+
+  return new Response(
+    JSON.stringify({ 
+      message: "User registered successfully", 
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        userType: newUser.userType,
+        pincode: newUser.pincode
+      }
+    }), 
+    { status: 201 }
+  );
 }
