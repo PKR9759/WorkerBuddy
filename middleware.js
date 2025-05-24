@@ -20,9 +20,9 @@ export async function middleware(request) {
 
   try {
     const { payload } = await jwtVerify(token, secret);
-
+    // console.log(payload
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', payload.id);
+    requestHeaders.set('x-user-id', payload.userId);
     requestHeaders.set('x-user-type', payload.userType);
 
     return NextResponse.next({

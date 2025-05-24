@@ -7,7 +7,7 @@ import Booking from '@/models/Booking';
 export async function GET(request) {
   try {
     await connectDB();
-
+    console.log(request.headers)
     // Get user ID and type from request headers (set by middleware)
     const userId = request.headers.get('x-user-id');
     const userType = request.headers.get('x-user-type');

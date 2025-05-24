@@ -23,7 +23,7 @@ export async function POST(req) {
     return new Response(JSON.stringify({ message: "Invalid credentials" }), { status: 401 });
   }
 
-  const token = jwt.sign({ id: user._id, userType: user.userType }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ userId: user._id, userType: user.userType }, JWT_SECRET, { expiresIn: "7d" });
 
   return new Response(JSON.stringify({ token, userType: user.userType }), { status: 200 });
 }
