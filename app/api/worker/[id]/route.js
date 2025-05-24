@@ -87,10 +87,12 @@ export async function GET(request, { params }) {
         `${todaySchedule.startTime} - ${todaySchedule.endTime}`
       ] : [],
       responseTime: (worker.rating || 0) > 4.5 ? "< 5 mins" : "< 15 mins",
-      startingPrice: calculateStartingPrice(worker.skills || [], worker.rating || 0),
-      emergencyAvailable: (worker.rating || 0) > 4.0 && (worker.completedJobs || 0) > 10,
+      // startingPrice: calculateStartingPrice(worker.skills || [], worker.rating || 0),
+      // emergencyAvailable: (worker.rating || 0) > 4.0 && (worker.completedJobs || 0) > 10,
       createdAt: worker.createdAt,
-      updatedAt: worker.updatedAt
+      updatedAt: worker.updatedAt,
+      pricePerHour: worker.pricePerHour || 0,
+
     };
     // console.log(worker.timeSlots)
 
@@ -109,38 +111,4 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
-
-function calculateStartingPrice(skills, rating) {
-  const basePrices = {
-    "Electrician": 300,
-    "Plumber": 250,
-    "Carpenter": 200,
-    "Painter": 150,
-    "Mechanic": 400,
-    "AC Repair": 350,
-    "Appliance Repair": 250,
-    "Welder": 300,
-    "Mason": 180,
-    "Technician": 280,
-    "Cleaner": 100,
-    "Gardener": 120,
-    "Chef": 500,
-    "Driver": 80,
-    "Security": 200
-  };
-
-  // Get base price from primary skill
-  const primarySkill = skills[0] || "General";
-  let basePrice = basePrices[primarySkill] || 200;
-
-  // Adjust price based on rating
-  const ratingMultiplier = rating > 4.5 ? 1.3 : rating > 4.0 ? 1.1 : 1.0;
-  
-  // Adjust for multiple skills
-  const skillMultiplier = skills.length > 2 ? 1.2 : skills.length > 1 ? 1.1 : 1.0;
-
-  const finalPrice = Math.round(basePrice * ratingMultiplier * skillMultiplier);
-  
-  return finalPrice;
 }

@@ -3,9 +3,23 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  ArrowLeft, Star, MapPin, Calendar, Clock, Shield, Users,
-  CheckCircle, Zap, Phone, Mail, Award, Briefcase, 
-  MessageCircle, ChevronRight, Building, Globe
+  ArrowLeft,
+  Star,
+  MapPin,
+  Calendar,
+  Clock,
+  Shield,
+  Users,
+  CheckCircle,
+  Zap,
+  Phone,
+  Mail,
+  Award,
+  Briefcase,
+  MessageCircle,
+  ChevronRight,
+  Building,
+  Globe,
 } from "lucide-react";
 import axios from "axios";
 
@@ -19,38 +33,40 @@ export default function WorkerDetailsPage() {
 
   // Get token from localStorage only on client side
   const [token, setToken] = useState(null);
-  
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setToken(localStorage.getItem("token"));
     }
   }, []);
 
   const days = [
-    { key: 'sunday', label: 'Sunday', short: 'Sun' },
-    { key: 'monday', label: 'Monday', short: 'Mon' },
-    { key: 'tuesday', label: 'Tuesday', short: 'Tue' },
-    { key: 'wednesday', label: 'Wednesday', short: 'Wed' },
-    { key: 'thursday', label: 'Thursday', short: 'Thu' },
-    { key: 'friday', label: 'Friday', short: 'Fri' },
-    { key: 'saturday', label: 'Saturday', short: 'Sat' }
+    { key: "sunday", label: "Sunday", short: "Sun" },
+    { key: "monday", label: "Monday", short: "Mon" },
+    { key: "tuesday", label: "Tuesday", short: "Tue" },
+    { key: "wednesday", label: "Wednesday", short: "Wed" },
+    { key: "thursday", label: "Thursday", short: "Thu" },
+    { key: "friday", label: "Friday", short: "Fri" },
+    { key: "saturday", label: "Saturday", short: "Sat" },
   ];
 
   useEffect(() => {
     const fetchWorkerDetails = async () => {
       if (!token) return; // Don't fetch if token is not available yet
-      
+
       setLoading(true);
       try {
         const res = await axios.get(`/api/worker/${params.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setWorker(res.data.worker);
         console.log("Worker data:", res.data.worker);
         console.log("TimeSlots:", res.data.worker.timeSlots);
       } catch (err) {
         console.error("Error fetching worker details:", err);
-        setError(err.response?.data?.message || "Failed to load worker details");
+        setError(
+          err.response?.data?.message || "Failed to load worker details"
+        );
       } finally {
         setLoading(false);
       }
@@ -63,10 +79,21 @@ export default function WorkerDetailsPage() {
 
   const getCategoryIcon = (category) => {
     const icons = {
-      Electrician: "⚡", Plumber: "🔧", Carpenter: "🔨", Painter: "🎨",
-      Mechanic: "⚙️", Cleaner: "🧽", Gardener: "🌱", Chef: "👨‍🍳",
-      Driver: "🚗", Security: "🛡️", Technician: "🔧", Mason: "🧱",
-      Welder: "🔥", "AC Repair": "❄️", "Appliance Repair": "📱"
+      Electrician: "⚡",
+      Plumber: "🔧",
+      Carpenter: "🔨",
+      Painter: "🎨",
+      Mechanic: "⚙️",
+      Cleaner: "🧽",
+      Gardener: "🌱",
+      Chef: "👨‍🍳",
+      Driver: "🚗",
+      Security: "🛡️",
+      Technician: "🔧",
+      Mason: "🧱",
+      Welder: "🔥",
+      "AC Repair": "❄️",
+      "Appliance Repair": "📱",
     };
     return icons[category] || "🛠️";
   };
@@ -81,9 +108,9 @@ export default function WorkerDetailsPage() {
   const formatTime = (time) => {
     if (!time) return "";
     try {
-      const [hours, minutes] = time.split(':');
+      const [hours, minutes] = time.split(":");
       const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const ampm = hour >= 12 ? "PM" : "AM";
       const hour12 = hour % 12 || 12;
       return `${hour12}:${minutes} ${ampm}`;
     } catch (error) {
@@ -98,10 +125,17 @@ export default function WorkerDetailsPage() {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />);
+      stars.push(
+        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+      );
     }
     if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 text-yellow-400 fill-current opacity-50" />);
+      stars.push(
+        <Star
+          key="half"
+          className="w-4 h-4 text-yellow-400 fill-current opacity-50"
+        />
+      );
     }
     for (let i = stars.length; i < 5; i++) {
       stars.push(<Star key={i} className="w-4 h-4 text-gray-400" />);
@@ -111,7 +145,11 @@ export default function WorkerDetailsPage() {
 
   const handleBookNow = () => {
     // Navigate to booking page with worker ID
-    router.push(`/book-service?workerId=${worker._id}&workerName=${encodeURIComponent(worker.name)}&skills=${encodeURIComponent(worker.skills.join(','))}`);
+    router.push(
+      `/book-service?workerId=${worker._id}&workerName=${encodeURIComponent(
+        worker.name
+      )}&skills=${encodeURIComponent(worker.skills.join(","))}`
+    );
   };
 
   if (loading) {
@@ -135,8 +173,12 @@ export default function WorkerDetailsPage() {
           <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <Users className="w-10 h-10 text-red-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4">Worker Not Found</h2>
-          <p className="text-gray-400 mb-6">{error || "The worker you're looking for doesn't exist."}</p>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Worker Not Found
+          </h2>
+          <p className="text-gray-400 mb-6">
+            {error || "The worker you're looking for doesn't exist."}
+          </p>
           <button
             onClick={() => router.back()}
             className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl text-white font-medium transition-all duration-300"
@@ -177,7 +219,7 @@ export default function WorkerDetailsPage() {
                   </div>
                 )}
               </div>
-              
+
               {isAvailableToday() && (
                 <div className="flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-4 py-2 rounded-full">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -198,14 +240,18 @@ export default function WorkerDetailsPage() {
                   </h1>
                   <div className="flex items-center gap-2 text-gray-400 mb-4">
                     <MapPin className="w-5 h-5 text-blue-400" />
-                    <span className="text-lg">{worker.address || worker.location || worker.pincode}</span>
+                    <span className="text-lg">
+                      {worker.address || worker.location || worker.pincode}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Contact Details */}
               <div className="bg-gray-700/30 rounded-xl p-4 mb-6">
-                <h3 className="text-lg font-semibold mb-3 text-white">Contact Information</h3>
+                <h3 className="text-lg font-semibold mb-3 text-white">
+                  Contact Information
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {worker.email && (
                     <div className="flex items-center gap-3">
@@ -234,8 +280,12 @@ export default function WorkerDetailsPage() {
                   <div className="flex items-center gap-2 mb-2">
                     {renderStars(worker.rating || 0)}
                   </div>
-                  <div className="text-2xl font-bold text-yellow-400">{(worker.rating || 0).toFixed(1)}</div>
-                  <div className="text-sm text-gray-400">{worker.reviewCount || 0} reviews</div>
+                  <div className="text-2xl font-bold text-yellow-400">
+                    {(worker.rating || 0).toFixed(1)}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {worker.reviewCount || 0} reviews
+                  </div>
                 </div>
 
                 <div className="bg-gray-700/30 rounded-xl p-4">
@@ -243,7 +293,9 @@ export default function WorkerDetailsPage() {
                     <Users className="w-5 h-5 text-blue-400" />
                     <span className="text-gray-300">Completed Jobs</span>
                   </div>
-                  <div className="text-2xl font-bold text-blue-400">{worker.completedJobs || 0}</div>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {worker.completedJobs || 0}
+                  </div>
                   <div className="text-sm text-gray-400">Projects finished</div>
                 </div>
 
@@ -253,10 +305,23 @@ export default function WorkerDetailsPage() {
                     <span className="text-gray-300">Experience</span>
                   </div>
                   <div className="text-2xl font-bold text-purple-400">
-                    {worker.experience || '1 year'}
+                    {worker.experience || "1 year"}
                   </div>
-                  <div className="text-sm text-gray-400">Professional experience</div>
+                  <div className="text-sm text-gray-400">
+                    Professional experience
+                  </div>
                 </div>
+                { worker.pricePerHour>0 && 
+                <div className="bg-gray-700/30 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-emerald-400 text-xl">₹</span>
+                    <span className="text-gray-300">Rate</span>
+                  </div>
+                  <div className="text-2xl font-bold text-emerald-400">
+                    ₹{worker.pricePerHour || 0}
+                  </div>
+                  <div className="text-sm text-gray-400">Per hour</div>
+                </div> }
               </div>
 
               {/* Skills */}
@@ -280,23 +345,21 @@ export default function WorkerDetailsPage() {
 
               {/* Book Now Button */}
               <div className="w-full">
-                <button 
+                <button
                   onClick={handleBookNow}
                   disabled={!isAvailableToday()}
                   className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
                     isAvailableToday()
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
-                      : 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                      : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
                   }`}
                 >
                   <Zap className="w-5 h-5" />
-                  {isAvailableToday() ? 'Book Service Now' : 'Not Available Today'}
+                  {isAvailableToday()
+                    ? "Book Service Now"
+                    : "Not Available Today"}
                 </button>
-                {worker.startingPrice && (
-                  <div className="text-center mt-2 text-gray-400">
-                    Starting from ₹{worker.startingPrice}
-                  </div>
-                )}
+                
               </div>
             </div>
           </div>
@@ -308,25 +371,23 @@ export default function WorkerDetailsPage() {
             <Calendar className="w-6 h-6 text-blue-400" />
             Weekly Schedule
           </h2>
-          
-          
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
             {days.map((day, index) => {
               const daySchedule = worker.timeSlots?.[day.key];
               const isToday = index === new Date().getDay();
-              
+
               console.log(`${day.key}:`, daySchedule); // Debug log
-              
+
               return (
                 <div
                   key={day.key}
                   className={`p-4 rounded-xl border transition-all duration-300 ${
                     isToday
-                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                      ? "bg-blue-500/20 border-blue-500/50 text-blue-400"
                       : daySchedule?.available
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                      : 'bg-gray-700/30 border-gray-600/30 text-gray-500'
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                      : "bg-gray-700/30 border-gray-600/30 text-gray-500"
                   }`}
                 >
                   <div className="text-center">
@@ -346,7 +407,7 @@ export default function WorkerDetailsPage() {
                       </div>
                     ) : (
                       <div className="text-sm font-medium">
-                        {daySchedule ? 'Closed' : 'Not Set'}
+                        {daySchedule ? "Closed" : "Not Set"}
                       </div>
                     )}
                   </div>
@@ -362,18 +423,24 @@ export default function WorkerDetailsPage() {
             <Briefcase className="w-6 h-6 text-blue-400" />
             Work Summary
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">{worker.completedJobs || 0}</div>
+              <div className="text-3xl font-bold text-blue-400 mb-2">
+                {worker.completedJobs || 0}
+              </div>
               <div className="text-gray-400">Total Jobs Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-emerald-400 mb-2">{(worker.rating || 0).toFixed(1)}</div>
+              <div className="text-3xl font-bold text-emerald-400 mb-2">
+                {(worker.rating || 0).toFixed(1)}
+              </div>
               <div className="text-gray-400">Average Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">{worker.reviewCount || 0}</div>
+              <div className="text-3xl font-bold text-purple-400 mb-2">
+                {worker.reviewCount || 0}
+              </div>
               <div className="text-gray-400">Customer Reviews</div>
             </div>
           </div>
@@ -385,7 +452,7 @@ export default function WorkerDetailsPage() {
             <MessageCircle className="w-6 h-6 text-blue-400" />
             Customer Reviews ({worker.reviewCount || 0})
           </h2>
-          
+
           {worker.reviews && worker.reviews.length > 0 ? (
             <div className="space-y-4">
               {worker.reviews.map((review, index) => (
@@ -394,10 +461,14 @@ export default function WorkerDetailsPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         {renderStars(review.rating || 0)}
-                        <span className="text-yellow-400 font-medium">{(review.rating || 0).toFixed(1)}</span>
+                        <span className="text-yellow-400 font-medium">
+                          {(review.rating || 0).toFixed(1)}
+                        </span>
                       </div>
                       <div className="text-sm text-gray-400">
-                        {review.userName || 'Anonymous'} • {review.jobType || 'Service'} • {new Date(review.createdAt).toLocaleDateString()}
+                        {review.userName || "Anonymous"} •{" "}
+                        {review.jobType || "Service"} •{" "}
+                        {new Date(review.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -408,8 +479,13 @@ export default function WorkerDetailsPage() {
           ) : (
             <div className="text-center py-12">
               <MessageCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-400 mb-2">No Reviews Yet</h3>
-              <p className="text-gray-500">This worker hasn't received any reviews yet. Be the first to hire them!</p>
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                No Reviews Yet
+              </h3>
+              <p className="text-gray-500">
+                This worker hasn't received any reviews yet. Be the first to
+                hire them!
+              </p>
             </div>
           )}
         </div>

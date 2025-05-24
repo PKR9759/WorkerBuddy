@@ -28,6 +28,7 @@ export async function GET(request) {
         userId: userId,
         skills: [],
         availability: true,
+        pricePerHour: 0,
         timeSlots: {
           monday: { available: true, startTime: "09:00", endTime: "18:00" },
           tuesday: { available: true, startTime: "09:00", endTime: "18:00" },
@@ -70,7 +71,8 @@ export async function GET(request) {
         reviews: worker.reviews || [],
         verified: worker.verified || false,
         completedJobs: worker.completedJobs || 0,
-        workHistory: worker.workHistory || []
+        workHistory: worker.workHistory || [],
+        pricePerHour:worker.pricePerHour || 0,
       }
     }), {
       status: 200,
@@ -101,7 +103,7 @@ export async function PATCH(request) {
       return new Response(JSON.stringify({ message: "Access denied" }), { status: 403 });
     }
 
-    const { name, phone, pincode, address, skills, availability, timeSlots } = await request.json();
+    const { name, phone, pincode, address, skills, availability, timeSlots , pricePerHour} = await request.json();
 
     // Find user by ID
     const user = await User.findById(userId);
@@ -114,6 +116,7 @@ export async function PATCH(request) {
     if (phone !== undefined) user.phone = phone;
     if (pincode !== undefined) user.pincode = pincode;
     if (address !== undefined) user.address = address;
+
     await user.save();
 
     // Find or create worker profile
@@ -123,6 +126,7 @@ export async function PATCH(request) {
         userId: userId,
         skills: [],
         availability: true,
+        pricePerHour:0,
         timeSlots: {
           monday: { available: true, startTime: "09:00", endTime: "18:00" },
           tuesday: { available: true, startTime: "09:00", endTime: "18:00" },
@@ -144,6 +148,8 @@ export async function PATCH(request) {
     if (skills !== undefined) worker.skills = skills;
     if (availability !== undefined) worker.availability = availability;
     if (timeSlots !== undefined) worker.timeSlots = timeSlots;
+    if (pricePerHour !== undefined) worker.pricePerHour = pricePerHour; 
+
     await worker.save();
 
     return new Response(JSON.stringify({
@@ -163,7 +169,8 @@ export async function PATCH(request) {
         reviews: worker.reviews || [],
         verified: worker.verified || false,
         completedJobs: worker.completedJobs || 0,
-        workHistory: worker.workHistory || []
+        workHistory: worker.workHistory || [],
+        pricePerHour:worker.pricePerHour|| 0
       }
     }), {
       status: 200,

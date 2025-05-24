@@ -1,7 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, MapPin, Edit3, Save, X, Loader2, AlertCircle, Star, CheckCircle, Plus, Minus, Briefcase, Award, Activity, Clock, Home } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Edit3,
+  Save,
+  X,
+  Loader2,
+  AlertCircle,
+  Star,
+  CheckCircle,
+  Plus,
+  Minus,
+  Briefcase,
+  Award,
+  Activity,
+  Clock,
+  Home,
+} from "lucide-react";
 import axios from "axios";
 
 export default function WorkerProfilePage() {
@@ -13,6 +32,7 @@ export default function WorkerProfilePage() {
     address: "",
     skills: [],
     availability: true,
+    pricePerHour: 0,
     timeSlots: {
       monday: { available: true, startTime: "09:00", endTime: "18:00" },
       tuesday: { available: true, startTime: "09:00", endTime: "18:00" },
@@ -20,13 +40,13 @@ export default function WorkerProfilePage() {
       thursday: { available: true, startTime: "09:00", endTime: "18:00" },
       friday: { available: true, startTime: "09:00", endTime: "18:00" },
       saturday: { available: true, startTime: "09:00", endTime: "18:00" },
-      sunday: { available: false, startTime: "09:00", endTime: "18:00" }
+      sunday: { available: false, startTime: "09:00", endTime: "18:00" },
     },
     rating: 0,
     verified: false,
     completedJobs: 0,
     workHistory: [],
-    reviews: []
+    reviews: [],
   });
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ ...workerData });
@@ -39,18 +59,26 @@ export default function WorkerProfilePage() {
   const getToken = () => localStorage.getItem("token");
 
   const availableSkills = [
-    "Electrician", "Plumber", "Carpenter", "Painter", "Mechanic", 
-    "Cleaner", "Gardner", "AC Repair", "Appliance Repair", "Pest Control"
+    "Electrician",
+    "Plumber",
+    "Carpenter",
+    "Painter",
+    "Mechanic",
+    "Cleaner",
+    "Gardner",
+    "AC Repair",
+    "Appliance Repair",
+    "Pest Control",
   ];
 
   const dayNames = {
     monday: "Monday",
-    tuesday: "Tuesday", 
+    tuesday: "Tuesday",
     wednesday: "Wednesday",
     thursday: "Thursday",
     friday: "Friday",
     saturday: "Saturday",
-    sunday: "Sunday"
+    sunday: "Sunday",
   };
 
   useEffect(() => {
@@ -64,16 +92,16 @@ export default function WorkerProfilePage() {
           return;
         }
 
-        const response = await axios.get('/api/worker/profile', {
+        const response = await axios.get("/api/worker/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
-        console.log('API Response:', response.data);
-        
+
+        console.log("API Response:", response.data);
+
         if (!response.data) {
           throw new Error("Invalid response format");
         }
-        
+
         const profile = {
           name: response.data?.user?.name || "",
           email: response.data?.user?.email || "",
@@ -82,28 +110,35 @@ export default function WorkerProfilePage() {
           address: response.data?.user?.address || "",
           skills: response.data?.worker?.skills || [],
           availability: response.data?.worker?.availability ?? true,
+          pricePerHour: response.data?.worker?.pricePerHour || 0,
           timeSlots: response.data?.worker?.timeSlots || {
             monday: { available: true, startTime: "09:00", endTime: "18:00" },
             tuesday: { available: true, startTime: "09:00", endTime: "18:00" },
-            wednesday: { available: true, startTime: "09:00", endTime: "18:00" },
+            wednesday: {
+              available: true,
+              startTime: "09:00",
+              endTime: "18:00",
+            },
             thursday: { available: true, startTime: "09:00", endTime: "18:00" },
             friday: { available: true, startTime: "09:00", endTime: "18:00" },
             saturday: { available: true, startTime: "09:00", endTime: "18:00" },
-            sunday: { available: false, startTime: "09:00", endTime: "18:00" }
+            sunday: { available: false, startTime: "09:00", endTime: "18:00" },
           },
           rating: response.data?.worker?.rating || 0,
           verified: response.data?.worker?.verified || false,
           completedJobs: response.data?.worker?.completedJobs || 0,
           workHistory: response.data?.worker?.workHistory || [],
-          reviews: response.data?.worker?.reviews || []
+          reviews: response.data?.worker?.reviews || [],
         };
-        
+
         setWorkerData(profile);
         setForm(profile);
       } catch (error) {
         console.error("Error fetching profile:", error);
         if (error.response?.status === 403) {
-          setError("Access denied. Please ensure you're logged in as a worker.");
+          setError(
+            "Access denied. Please ensure you're logged in as a worker."
+          );
         } else if (error.response?.status === 404) {
           setError("Worker profile not found.");
         } else {
@@ -119,9 +154,9 @@ export default function WorkerProfilePage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ 
-      ...form, 
-      [name]: type === 'checkbox' ? checked : value 
+    setForm({
+      ...form,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -132,9 +167,9 @@ export default function WorkerProfilePage() {
         ...form.timeSlots,
         [day]: {
           ...form.timeSlots[day],
-          [field]: value
-        }
-      }
+          [field]: value,
+        },
+      },
     });
   };
 
@@ -152,9 +187,9 @@ export default function WorkerProfilePage() {
   };
 
   const handleRemoveSkill = (skillToRemove) => {
-    setForm({ 
-      ...form, 
-      skills: form.skills.filter(skill => skill !== skillToRemove) 
+    setForm({
+      ...form,
+      skills: form.skills.filter((skill) => skill !== skillToRemove),
     });
   };
 
@@ -164,7 +199,7 @@ export default function WorkerProfilePage() {
     setSuccess("");
     try {
       const token = getToken();
-      await axios.patch('/api/worker/profile', form, {
+      await axios.patch("/api/worker/profile", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWorkerData(form);
@@ -190,7 +225,7 @@ export default function WorkerProfilePage() {
       Gardner: "🌱",
       "AC Repair": "❄️",
       "Appliance Repair": "🔌",
-      "Pest Control": "🐛"
+      "Pest Control": "🐛",
     };
     return icons[skill] || "🛠️";
   };
@@ -220,12 +255,16 @@ export default function WorkerProfilePage() {
                 Worker Profile
               </span>
             </h1>
-            <p className="text-gray-400 text-lg">Manage your professional information and services</p>
+            <p className="text-gray-400 text-lg">
+              Manage your professional information and services
+            </p>
           </div>
           {workerData.verified && (
             <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-xl">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">Verified Professional</span>
+              <span className="text-emerald-400 font-medium">
+                Verified Professional
+              </span>
             </div>
           )}
         </div>
@@ -254,7 +293,9 @@ export default function WorkerProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-white">Basic Information</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Basic Information
+                </h2>
               </div>
 
               <div className="space-y-6">
@@ -274,7 +315,9 @@ export default function WorkerProfilePage() {
                     />
                   ) : (
                     <div className="px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl">
-                      <p className="text-white text-lg">{workerData.name || "No name provided"}</p>
+                      <p className="text-white text-lg">
+                        {workerData.name || "No name provided"}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -286,7 +329,9 @@ export default function WorkerProfilePage() {
                   </label>
                   <div className="px-4 py-3 bg-gray-700/20 border border-gray-600/20 rounded-xl">
                     <p className="text-gray-300">{workerData.email}</p>
-                    <small className="text-gray-500">Email cannot be changed</small>
+                    <small className="text-gray-500">
+                      Email cannot be changed
+                    </small>
                   </div>
                 </div>
 
@@ -306,7 +351,9 @@ export default function WorkerProfilePage() {
                     />
                   ) : (
                     <div className="px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl">
-                      <p className="text-white text-lg">{workerData.phone || "No phone provided"}</p>
+                      <p className="text-white text-lg">
+                        {workerData.phone || "No phone provided"}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -327,7 +374,9 @@ export default function WorkerProfilePage() {
                     />
                   ) : (
                     <div className="px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl">
-                      <p className="text-white text-lg">{workerData.pincode || "No pincode provided"}</p>
+                      <p className="text-white text-lg">
+                        {workerData.pincode || "No pincode provided"}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -348,7 +397,35 @@ export default function WorkerProfilePage() {
                     />
                   ) : (
                     <div className="px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl">
-                      <p className="text-white text-lg">{workerData.address || "No address provided"}</p>
+                      <p className="text-white text-lg">
+                        {workerData.address || "No address provided"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-gray-400 font-medium mb-2">
+                    <span className="text-lg">💰</span>
+                    Price Per Hour (₹)
+                  </label>
+                  {editMode ? (
+                    <input
+                      type="number"
+                      name="pricePerHour"
+                      value={form.pricePerHour}
+                      onChange={handleChange}
+                      min="0"
+                      step="50"
+                      className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                      placeholder="Enter your hourly rate"
+                    />
+                  ) : (
+                    <div className="px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl">
+                      <p className="text-white text-lg">
+                        {workerData.pricePerHour > 0
+                          ? `₹${workerData.pricePerHour}/hour`
+                          : "No rate set"}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -371,16 +448,24 @@ export default function WorkerProfilePage() {
                     </label>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${
-                        workerData.availability 
-                          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' 
-                          : 'bg-red-500/20 border-red-500/30 text-red-400'
-                      }`}>
-                        <div className={`w-2 h-2 rounded-full ${
-                          workerData.availability ? 'bg-emerald-400' : 'bg-red-400'
-                        }`}></div>
+                      <div
+                        className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${
+                          workerData.availability
+                            ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                            : "bg-red-500/20 border-red-500/30 text-red-400"
+                        }`}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            workerData.availability
+                              ? "bg-emerald-400"
+                              : "bg-red-400"
+                          }`}
+                        ></div>
                         <span className="font-medium">
-                          {workerData.availability ? 'Available' : 'Not Available'}
+                          {workerData.availability
+                            ? "Available"
+                            : "Not Available"}
                         </span>
                       </div>
                     </div>
@@ -395,14 +480,18 @@ export default function WorkerProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
                   <Briefcase className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-white">Skills & Services</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Skills & Services
+                </h2>
               </div>
 
               {editMode ? (
                 <div className="space-y-6">
                   {/* Current Skills */}
                   <div>
-                    <label className="text-gray-400 font-medium mb-3 block">Your Skills</label>
+                    <label className="text-gray-400 font-medium mb-3 block">
+                      Your Skills
+                    </label>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {form.skills.map((skill) => (
                         <div
@@ -424,7 +513,9 @@ export default function WorkerProfilePage() {
 
                   {/* Add Custom Skill */}
                   <div>
-                    <label className="text-gray-400 font-medium mb-3 block">Add Custom Skill</label>
+                    <label className="text-gray-400 font-medium mb-3 block">
+                      Add Custom Skill
+                    </label>
                     <div className="flex gap-2 mb-4">
                       <input
                         type="text"
@@ -432,7 +523,9 @@ export default function WorkerProfilePage() {
                         onChange={(e) => setNewSkill(e.target.value)}
                         placeholder="Enter custom skill"
                         className="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddCustomSkill()}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAddCustomSkill()
+                        }
                       />
                       <button
                         onClick={handleAddCustomSkill}
@@ -446,10 +539,12 @@ export default function WorkerProfilePage() {
 
                   {/* Available Skills */}
                   <div>
-                    <label className="text-gray-400 font-medium mb-3 block">Popular Skills</label>
+                    <label className="text-gray-400 font-medium mb-3 block">
+                      Popular Skills
+                    </label>
                     <div className="flex flex-wrap gap-2">
                       {availableSkills
-                        .filter(skill => !form.skills.includes(skill))
+                        .filter((skill) => !form.skills.includes(skill))
                         .map((skill) => (
                           <button
                             key={skill}
@@ -488,12 +583,17 @@ export default function WorkerProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-white">Working Hours</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Working Hours
+                </h2>
               </div>
 
               <div className="space-y-4">
                 {Object.entries(form.timeSlots).map(([day, slot]) => (
-                  <div key={day} className="p-4 bg-gray-700/30 border border-gray-600/30 rounded-xl">
+                  <div
+                    key={day}
+                    className="p-4 bg-gray-700/30 border border-gray-600/30 rounded-xl"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       <div className="flex items-center gap-3 min-w-[100px]">
                         {editMode ? (
@@ -501,19 +601,31 @@ export default function WorkerProfilePage() {
                             <input
                               type="checkbox"
                               checked={slot.available}
-                              onChange={(e) => handleTimeSlotChange(day, 'available', e.target.checked)}
+                              onChange={(e) =>
+                                handleTimeSlotChange(
+                                  day,
+                                  "available",
+                                  e.target.checked
+                                )
+                              }
                               className="w-4 h-4 rounded border-gray-600 text-blue-500 focus:ring-blue-500/50"
                             />
-                            <span className="text-white font-medium capitalize">{dayNames[day]}</span>
+                            <span className="text-white font-medium capitalize">
+                              {dayNames[day]}
+                            </span>
                           </label>
                         ) : (
-                          <span className="text-white font-medium capitalize">{dayNames[day]}</span>
+                          <span className="text-white font-medium capitalize">
+                            {dayNames[day]}
+                          </span>
                         )}
-                        <div className={`w-2 h-2 rounded-full ${
-                          slot.available ? 'bg-emerald-400' : 'bg-red-400'
-                        }`}></div>
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            slot.available ? "bg-emerald-400" : "bg-red-400"
+                          }`}
+                        ></div>
                       </div>
-                      
+
                       {slot.available && (
                         <div className="flex items-center gap-2 flex-1">
                           {editMode ? (
@@ -521,14 +633,26 @@ export default function WorkerProfilePage() {
                               <input
                                 type="time"
                                 value={slot.startTime}
-                                onChange={(e) => handleTimeSlotChange(day, 'startTime', e.target.value)}
+                                onChange={(e) =>
+                                  handleTimeSlotChange(
+                                    day,
+                                    "startTime",
+                                    e.target.value
+                                  )
+                                }
                                 className="px-3 py-2 bg-gray-600/50 border border-gray-500/50 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                               />
                               <span className="text-gray-400">to</span>
                               <input
                                 type="time"
                                 value={slot.endTime}
-                                onChange={(e) => handleTimeSlotChange(day, 'endTime', e.target.value)}
+                                onChange={(e) =>
+                                  handleTimeSlotChange(
+                                    day,
+                                    "endTime",
+                                    e.target.value
+                                  )
+                                }
                                 className="px-3 py-2 bg-gray-600/50 border border-gray-500/50 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                               />
                             </>
@@ -539,9 +663,11 @@ export default function WorkerProfilePage() {
                           )}
                         </div>
                       )}
-                      
+
                       {!slot.available && !editMode && (
-                        <span className="text-gray-400 italic">Not available</span>
+                        <span className="text-gray-400 italic">
+                          Not available
+                        </span>
                       )}
                     </div>
                   </div>
@@ -558,7 +684,9 @@ export default function WorkerProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
                   <Award className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-white">Professional Stats</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Professional Stats
+                </h2>
               </div>
 
               <div className="space-y-6">
@@ -572,7 +700,8 @@ export default function WorkerProfilePage() {
                   </div>
                   <p className="text-gray-400">Average Rating</p>
                   <p className="text-gray-500 text-sm mt-1">
-                    Based on {workerData.reviews.length} review{workerData.reviews.length !== 1 ? 's' : ''}
+                    Based on {workerData.reviews.length} review
+                    {workerData.reviews.length !== 1 ? "s" : ""}
                   </p>
                 </div>
 
@@ -593,7 +722,27 @@ export default function WorkerProfilePage() {
                 </div>
               </div>
             </div>
+            {/* Pricing Card */}
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/30 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-lg">💰</span>
+                </div>
+                <h2 className="text-xl font-semibold text-white">Pricing</h2>
+              </div>
 
+              <div className="text-center">
+                <div className="text-3xl font-bold text-emerald-400 mb-2">
+                  ₹{workerData.pricePerHour}
+                </div>
+                <p className="text-gray-400">Per Hour</p>
+                {workerData.pricePerHour === 0 && (
+                  <p className="text-yellow-400 text-sm mt-2">
+                    Set your hourly rate to attract more customers
+                  </p>
+                )}
+              </div>
+            </div>
             {/* Action Buttons */}
             <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/30 p-6">
               <div className="space-y-4">
@@ -632,8 +781,8 @@ export default function WorkerProfilePage() {
                 ) : (
                   <button
                     onClick={() => setEditMode(true)}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl text-white font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                  
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl text-white font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  >
                     <Edit3 className="w-5 h-5" />
                     Edit Profile
                   </button>
@@ -647,14 +796,21 @@ export default function WorkerProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <AlertCircle className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Profile Tips</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Profile Tips
+                </h3>
               </div>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li>• Keep your contact information updated for better communication</li>
+                <li>
+                  • Keep your contact information updated for better
+                  communication
+                </li>
                 <li>• Add all relevant skills to get more job opportunities</li>
                 <li>• Update your availability status regularly</li>
                 <li>• Complete profile helps build customer trust</li>
-                <li>• Set proper working hours to match customer expectations</li>
+                <li>
+                  • Set proper working hours to match customer expectations
+                </li>
               </ul>
             </div>
           </div>

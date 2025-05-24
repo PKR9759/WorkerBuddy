@@ -4,6 +4,7 @@ const WorkerSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   skills: [String],
   availability: { type: Boolean, default: true },
+  pricePerHour: { type: Number},
   timeSlots: {
     monday: {
       available: { type: Boolean, default: true },

@@ -101,6 +101,8 @@ export async function GET(req) {
             `${todaySchedule.startTime} - ${todaySchedule.endTime}`
           ] : [],
           createdAt: worker.createdAt,
+          pricePerHour: worker.pricePerHour || 0,
+
         };
       });
 
@@ -202,42 +204,21 @@ function applySorting(workers, sortBy) {
         if (bExp !== aExp) return bExp - aExp;
         return b.rating - a.rating; // Secondary sort by rating
       });
+
+      case "price":
+  return workers.sort((a, b) => {
+    if (a.pricePerHour !== b.pricePerHour) return a.pricePerHour - b.pricePerHour; // Low to high
+    return b.rating - a.rating; // Secondary sort by rating
+  });
+
+  case "priceDesc":
+  return workers.sort((a, b) => {
+    if (b.pricePerHour !== a.pricePerHour) return b.pricePerHour - a.pricePerHour; // High to low
+    return b.rating - a.rating; // Secondary sort by rating
+  });
     
     default:
       return workers.sort((a, b) => b.rating - a.rating);
   }
 }
 
-function calculateStartingPrice(skills, rating) {
-  const basePrices = {
-    "Electrician": 300,
-    "Plumber": 250,
-    "Carpenter": 200,
-    "Painter": 150,
-    "Mechanic": 400,
-    "AC Repair": 350,
-    "Appliance Repair": 250,
-    "Welder": 300,
-    "Mason": 180,
-    "Technician": 280,
-    "Cleaner": 100,
-    "Gardener": 120,
-    "Chef": 500,
-    "Driver": 80,
-    "Security": 200
-  };
-
-  // Get base price from primary skill
-  const primarySkill = skills[0] || "General";
-  let basePrice = basePrices[primarySkill] || 200;
-
-  // Adjust price based on rating
-  const ratingMultiplier = rating > 4.5 ? 1.3 : rating > 4.0 ? 1.1 : 1.0;
-  
-  // Adjust for multiple skills
-  const skillMultiplier = skills.length > 2 ? 1.2 : skills.length > 1 ? 1.1 : 1.0;
-
-  const finalPrice = Math.round(basePrice * ratingMultiplier * skillMultiplier);
-  
-  return finalPrice;
-}
