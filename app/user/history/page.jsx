@@ -142,9 +142,7 @@ export default function UserHistoryPage() {
       });
 
       if (response.data.success) {
-        alert(
-          editingReview ? "Review updated successfully!" : response.data.message
-        );
+        
 
         // Refresh the history to update review status
         const updatedResponse = await axios.get("/api/bookings", {
