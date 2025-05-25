@@ -46,6 +46,7 @@ const WorkerSchema = new mongoose.Schema({
   reviews: [
     {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking' }, // Added this field
       comment: String,
       rating: { type: Number, min: 1, max: 5 },
       jobType: String, // What service was provided
@@ -67,7 +68,7 @@ const WorkerSchema = new mongoose.Schema({
 WorkerSchema.pre('save', function(next) {
   if (this.reviews && this.reviews.length > 0) {
     const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-    this.rating = totalRating / this.reviews.length;
+    this.rating = Math.round((totalRating / this.reviews.length) * 10) / 10; // Round to 1 decimal place
   } else {
     this.rating = 0;
   }

@@ -9,14 +9,24 @@ import {
   MapPin,
   User,
   Briefcase,
-  CreditCard,    
-  DollarSign, 
+  CreditCard,
+  DollarSign,
+  Star,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 import axios from "axios";
 
 export default function UserHistoryPage() {
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [reviewModal, setReviewModal] = useState({
+    open: false,
+    booking: null,
+  });
+  const [reviewData, setReviewData] = useState({ rating: 0, comment: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [editingReview, setEditingReview] = useState(false);
 
   const getToken = () => localStorage.getItem("token");
 
@@ -46,22 +56,113 @@ export default function UserHistoryPage() {
           icon: <CreditCard className="w-4 h-4 text-emerald-400" />,
           color: "text-emerald-400",
           bgColor: "bg-emerald-500/10 border-emerald-500/20",
-          text: "Payment Complete"
+          text: "Payment Complete",
         };
       case "pending":
         return {
           icon: <DollarSign className="w-4 h-4 text-orange-400" />,
           color: "text-orange-400",
           bgColor: "bg-orange-500/10 border-orange-500/20",
-          text: "Payment Pending"
+          text: "Payment Pending",
         };
       default:
         return {
           icon: <Clock className="w-4 h-4 text-gray-400" />,
           color: "text-gray-400",
           bgColor: "bg-gray-500/10 border-gray-500/20",
-          text: "No Payment Required"
+          text: "No Payment Required",
         };
+    }
+  };
+  const openReviewModal = async (booking, isEdit = false) => {
+    try {
+      const token = getToken();
+      const response = await axios.get(
+        `/api/reviews?workerId=${booking.workerId}&bookingId=${booking.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.hasReview && !isEdit) {
+        alert("You have already reviewed this worker for this booking.");
+        return;
+      }
+
+      setEditingReview(isEdit);
+      setReviewModal({ open: true, booking });
+
+      if (isEdit && response.data.review) {
+        setReviewData({
+          rating: response.data.review.rating,
+          comment: response.data.review.comment || "",
+        });
+      } else {
+        setReviewData({ rating: 0, comment: "" });
+      }
+    } catch (error) {
+      console.error("Error checking existing review:", error);
+      setEditingReview(isEdit);
+      setReviewModal({ open: true, booking });
+      setReviewData({ rating: 0, comment: "" });
+    }
+  };
+
+  const closeReviewModal = () => {
+    setReviewModal({ open: false, booking: null });
+    setReviewData({ rating: 0, comment: "" });
+    setEditingReview(false);
+  };
+
+  const handleStarClick = (rating) => {
+    setReviewData((prev) => ({ ...prev, rating }));
+  };
+
+  const submitReview = async () => {
+    if (reviewData.rating === 0) {
+      alert("Please select a rating");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const token = getToken();
+      const method = editingReview ? "PUT" : "POST";
+      const response = await axios({
+        method: method,
+        url: "/api/reviews",
+        data: {
+          bookingId: reviewModal.booking.id,
+          workerId: reviewModal.booking.workerId,
+          rating: reviewData.rating,
+          comment: reviewData.comment,
+          jobType: reviewModal.booking.category,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success) {
+        alert(
+          editingReview ? "Review updated successfully!" : response.data.message
+        );
+
+        // Refresh the history to update review status
+        const updatedResponse = await axios.get("/api/bookings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setHistory(updatedResponse.data.bookings || []);
+
+        closeReviewModal();
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert(
+        `Failed to ${
+          editingReview ? "update" : "submit"
+        } review. Please try again.`
+      );
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -282,6 +383,36 @@ export default function UserHistoryPage() {
                       </span>
                     </div>
                   )}
+
+                  {/* Review Status */}
+                  {item.status.toLowerCase() === "completed" &&
+                    item.paymentStatus.toLowerCase() === "paid" && (
+                      <div
+                        className={`px-4 py-2 rounded-xl border ${
+                          item.hasReview
+                            ? "bg-green-500/10 border-green-500/20"
+                            : "bg-yellow-500/10 border-yellow-500/20"
+                        } flex items-center gap-2`}
+                      >
+                        <Star
+                          className={`w-4 h-4 ${
+                            item.hasReview
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }`}
+                        />
+                        <span
+                          className={`font-semibold text-sm ${
+                            item.hasReview
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }`}
+                        >
+                          {item.hasReview ? "Reviewed" : "Review Pending"}
+                        </span>
+                      </div>
+                    )}
+
                   {/* {console.log(item.status)} */}
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-3 w-full">
@@ -330,12 +461,154 @@ export default function UserHistoryPage() {
                         </div>
                       </button>
                     )}
+
+                    {item.status.toLowerCase() === "completed" &&
+                      item.paymentStatus.toLowerCase() === "paid" &&
+                      !item.hasReview && (
+                        <button
+                          onClick={() => openReviewModal(item, false)}
+                          className="group relative px-6 py-3 bg-gradient-to-r from-yellow-500/20 via-yellow-600/20 to-yellow-500/20 
+        hover:from-yellow-500/30 hover:via-yellow-600/30 hover:to-yellow-500/30 
+        border border-yellow-500/30 hover:border-yellow-400/50 
+        backdrop-blur-xl rounded-xl text-yellow-400 hover:text-yellow-300 
+        font-semibold transition-all duration-300 transform hover:scale-[1.02] 
+        shadow-lg hover:shadow-yellow-500/20 hover:shadow-2xl
+        active:scale-[0.98] overflow-hidden"
+                        >
+                          <div
+                            className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-yellow-500/10 
+        opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          ></div>
+                          <div className="relative flex items-center justify-center gap-2">
+                            <Star className="w-4 h-4" />
+                            Add Review
+                          </div>
+                        </button>
+                      )}
+
+                    {/* Edit Review Button */}
+                    {item.status.toLowerCase() === "completed" &&
+                      item.paymentStatus.toLowerCase() === "paid" &&
+                      item.hasReview && (
+                        <button
+                          onClick={() => openReviewModal(item, true)}
+                          className="group relative px-6 py-3 bg-gradient-to-r from-blue-500/20 via-blue-600/20 to-blue-500/20 
+        hover:from-blue-500/30 hover:via-blue-600/30 hover:to-blue-500/30 
+        border border-blue-500/30 hover:border-blue-400/50 
+        backdrop-blur-xl rounded-xl text-blue-400 hover:text-blue-300 
+        font-semibold transition-all duration-300 transform hover:scale-[1.02] 
+        shadow-lg hover:shadow-blue-500/20 hover:shadow-2xl
+        active:scale-[0.98] overflow-hidden"
+                        >
+                          <div
+                            className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-500/10 
+        opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          ></div>
+                          <div className="relative flex items-center justify-center gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Edit Review
+                          </div>
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
             </div>
           );
         })}
+
+        {/* Review Modal */}
+        {reviewModal.open && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white">
+                  {editingReview ? "Edit Review" : "Rate & Review"}
+                </h3>
+                <button
+                  onClick={closeReviewModal}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-300 mb-2">
+                    Worker: {reviewModal.booking?.workerName}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Service: {reviewModal.booking?.category}
+                  </p>
+                </div>
+
+                {/* Star Rating */}
+                <div>
+                  <label className="block text-gray-300 mb-2">Rating</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => handleStarClick(star)}
+                        className={`p-1 transition-colors ${
+                          star <= reviewData.rating
+                            ? "text-yellow-400 hover:text-yellow-300"
+                            : "text-gray-600 hover:text-gray-500"
+                        }`}
+                      >
+                        <Star className="w-8 h-8 fill-current" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Comment */}
+                <div>
+                  <label className="block text-gray-300 mb-2">
+                    Comment (Optional)
+                  </label>
+                  <textarea
+                    value={reviewData.comment}
+                    onChange={(e) =>
+                      setReviewData((prev) => ({
+                        ...prev,
+                        comment: e.target.value,
+                      }))
+                    }
+                    placeholder="Share your experience..."
+                    className="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
+                    rows={4}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={closeReviewModal}
+                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={submitReview}
+                    disabled={submittingReview || reviewData.rating === 0}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:from-gray-600 disabled:to-gray-600 text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+                  >
+                    {submittingReview ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        {editingReview ? "Update Review" : "Submit Review"}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Empty State */}
         {history.length === 0 && (

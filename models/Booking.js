@@ -21,7 +21,11 @@ const BookingSchema = new mongoose.Schema({
   },
   scheduledTime: Date,
   jobDescription: String,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  hasReview: {
+    type: Boolean,
+    default: false
+  }
 });
 
 export default mongoose.models.Booking || mongoose.model("Booking", BookingSchema);
