@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# WorkerBuddy 🛠️
 
-## Getting Started
+**WorkerBuddy** is a full-stack web application built with **Next.js**, designed to help users easily find and connect with skilled workers online. The platform offers role-based access for two main roles: **User** and **Worker**, each with its own features and interfaces.
 
-First, run the development server:
+
+
+---
+
+## 🌐 Live Demo
+
+👉 [Click here to visit WorkerBuddy](https://worker-buddy.vercel.app)
+
+---
+
+## 🔑 Features
+
+### 👤 Role-Based Authorization
+
+- **User Role**:
+  - View all available workers.
+  - Sort and filter workers by category, location, experience, rating, etc.
+  - Search bar to find specific workers.
+  - Send requests to workers.
+  - Manage profile and request history.
+  - Add or update reviews after job completion.
+
+- **Worker Role**:
+  - View all incoming job requests with status updates.
+  - Accept or decline requests.
+  - Update request status (e.g., In Progress, Completed).
+  - Manage profile information.
+  - Review section to view user feedback and ratings.
+
+---
+
+## 🗂️ Pages & Components Overview
+
+### User Side:
+
+- **Homepage**: Browse all workers with sorting, filtering & search.
+- **Request History Page**: Track all service requests, leave or edit reviews.
+- **Profile Page**: Update personal info, view ratings and past interactions.
+
+### Worker Side:
+
+- **Homepage**: See all incoming requests with current status.
+- **Review Menu**: Check reviews submitted by users.
+- **Profile Page**: Manage your worker profile and services.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js, React
+- **Styling**: Tailwind CSS
+- **Backend**: API Routes (Next.js)
+- **Database**: MongoDB 
+- **Authentication**: JWT 
+- **Deployment**: Vercel
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/PKR9759/WorkerBuddy.git
+cd WorkerBuddy
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set Environment Variables
+
+Create a `.env.local` file and add your environment variables:
+
+```
+MONGODB_URI=your_mongodb_url
+JWT_SECRET=your_jwt_secret
+
+```
+
+### 4. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000` in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧪 Functional Highlights
 
-## Learn More
+- 🔐 Protected routes using role-based checks
+- 📦 Dynamic filtering and sorting
+- 📜 Request lifecycle management (Pending, In Progress, Completed)
+- ✍️ Rating & Review system
+- 🧾 Request history and profile updates
+- 🔄 Review editing feature
+- 🧑 Profile management for both users and workers
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧑‍💻 Author
 
-## Deploy on Vercel
+Developed by **[Kukdip Parmar]**  
+Feel free to connect with me on:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- LinkedIn: Kuldip Rupsangbhai Parmar
+- Email: kuldiprparmar9759@gmail.com
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
