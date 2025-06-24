@@ -110,7 +110,7 @@ Visit `http://localhost:3000` in your browser.
 
 ## 🧑‍💻 Author
 
-Developed by **[Kukdip Parmar]**  
+Developed by **[Kuldip Parmar]**  
 Feel free to connect with me on:
 
 - LinkedIn: Kuldip Rupsangbhai Parmar
